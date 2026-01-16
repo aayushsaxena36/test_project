@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hospital_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./server
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://admin:password@postgres:5432/hospital_db
+      - NODE_ENV=development
+    depends_on:
+      - postgres
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    command: npm run dev
+
+  frontend:
+    build: ./client
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    command: npm run dev -- --host
+
+volumes:
+  postgres_data:
