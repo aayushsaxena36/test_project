@@ -63,11 +63,12 @@ router.post("/reserve-dose", async (req: Request, res: Response) => {
       "INSERT INTO reservations (patient_id, status, timestamp) VALUES ($1, $2, NOW())",
       [patientId, "CONFIRMED"]
     );
-
+    await client.query('COMMIT');
     res.json({ success: true, message: "Dose reserved" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal Server Error" });
+    await client.query('ROLLBACK');
   } finally {
     if (client) await client.end();
   }
