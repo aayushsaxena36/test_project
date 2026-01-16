@@ -36,9 +36,9 @@ router.get("/hospital-status", async (req: Request, res: Response) => {
 router.post("/reserve-dose", async (req: Request, res: Response) => {
   const { patientId } = req.body;
   let client;
-
+  client = await getDbClient();
+  await client.query('BEGIN');
   try {
-    client = await getDbClient();
 
     const stockRes = await client.query(
       "SELECT count FROM inventory WHERE item_name = $1 FOR UPDATE",
